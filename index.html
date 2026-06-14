@@ -317,6 +317,12 @@ const RIOT_PROXY_URL = "";
 // 3) Región del grupo (afecta op.gg y la Riot API).
 const REGION = "las"; // op.gg usa: las, lan, na, euw, etc.
 
+// 4) Cloudinary para las capturas (gratis, sin tarjeta). Ver SETUP.md.
+//    Dejalos "" si todavía no lo configuraste: la app funciona igual,
+//    pero sin la galería de capturas.
+const CLOUDINARY_CLOUD_NAME = "dmtmthzje";    // ej: "dxxxxx"
+const CLOUDINARY_UPLOAD_PRESET = "tcdrw58f"; // nombre del "unsigned upload preset"
+
 /* ============================================================
    FIN DE LA CONFIGURACIÓN
    ============================================================ */
@@ -330,12 +336,9 @@ import {
   getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs,
   deleteDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {
-  getStorage, ref as sRef, uploadBytes, getDownloadURL, deleteObject
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
 const CONFIGURED = !!firebaseConfig.apiKey;
-let app, auth, db, storage, ddVersion = "15.11.1";
+const CLOUDINARY_OK = !!CLOUDINARY_CLOUD_NAME && !!CLOUDINARY_UPLOAD_PRESET;
+let app, auth, db, ddVersion = "15.11.1";
 let me = null;
 let players = [], bans = [], shots = [];
 let unsub = [];
@@ -362,7 +365,6 @@ if (!CONFIGURED) {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
-  storage = getStorage(app);
   fetchDDVersion();
   onAuthStateChanged(auth, user => {
     if (user) { me = user; enterApp(); }
@@ -439,6 +441,9 @@ function leaveApp(){
 function showConfigWarnings(){
   if (!RIOT_PROXY_URL) {
     $("#playersCfg").innerHTML = `<div class="config-warn">ℹ Las stats automáticas de Riot están desactivadas (falta el proxy). Igual podés agregar jugadores y abrir su op.gg. Configurá <b>RIOT_PROXY_URL</b> para activar rango, winrate y partidas. Ver <b>SETUP.md</b>.</div>`;
+  }
+  if (!CLOUDINARY_OK) {
+    $("#shotsCfg").innerHTML = `<div class="config-warn">ℹ Para subir capturas configurá <b>Cloudinary</b> (gratis, sin tarjeta): pegá <b>CLOUDINARY_CLOUD_NAME</b> y <b>CLOUDINARY_UPLOAD_PRESET</b> en index.html. Ver <b>SETUP.md</b>.</div>`;
   }
 }
 
@@ -821,15 +826,18 @@ document.body.appendChild(shotInput);
 shotInput.onchange = async () => {
   const file = shotInput.files[0]; shotInput.value="";
   if (!file) return;
+  if (!CLOUDINARY_OK){ toast("Configurá Cloudinary primero"); return; }
   const caption = prompt("Título de la captura (opcional):") || "";
   toast("Subiendo...");
   try {
-    const path = `screenshots/${Date.now()}_${file.name.replace(/[^\w.\-]/g,"_")}`;
-    const r = sRef(storage, path);
-    await uploadBytes(r, file);
-    const url = await getDownloadURL(r);
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method:"POST", body: fd });
+    if (!res.ok) throw new Error("cloudinary "+res.status);
+    const data = await res.json();
     await addDoc(collection(db,"screenshots"), {
-      url, storagePath: path, caption,
+      url: data.secure_url, publicId: data.public_id, caption,
       uploadedBy: me.uid, uploadedByName: me.displayName || me.email,
       createdAt: serverTimestamp()
     });
@@ -850,8 +858,9 @@ $("#lightboxImg").onclick = async (e) => {
   const sh = $("#lightbox")._shot;
   if (sh.uploadedBy === me.uid && confirm("¿Eliminar esta captura?")){
     try {
+      // Quita la captura de la galería. La imagen queda en Cloudinary
+      // (borrado total requiere su panel/API), pero deja de mostrarse.
       await deleteDoc(doc(db,"screenshots",sh.id));
-      if (sh.storagePath) await deleteObject(sRef(storage, sh.storagePath)).catch(()=>{});
       $("#lightbox").classList.remove("open"); toast("Captura eliminada");
     } catch(err){ console.error(err); toast("Error al eliminar"); }
   }
@@ -866,6 +875,7 @@ function renderSettingsStatus(){
   $("#meStatus").innerHTML = `
     ${ok} Firebase conectado<br>
     ${RIOT_PROXY_URL ? ok+" Proxy de Riot configurado" : no+" Proxy de Riot sin configurar (sin stats automáticas)"}<br>
+    ${CLOUDINARY_OK ? ok+" Cloudinary configurado (capturas)" : no+" Cloudinary sin configurar (sin capturas)"}<br>
     <span style="color:var(--text-muted)">Región: ${REGION.toUpperCase()} · Data Dragon ${ddVersion}</span>`;
 }
 
