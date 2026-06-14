@@ -126,6 +126,74 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 .ban-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; font-size: 0.68rem; color: var(--text-muted); }
 .ban-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 8px; font-style: italic; }
 
+/* ---- Ban timeline (gantt) ---- */
+.tl-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 0 6px; margin-bottom: 16px; }
+.tl-title { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-muted); padding: 0 14px 10px; }
+.tl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tl-inner { position: relative; --dayw: 26px; --labelw: 92px; }
+.tl-row { display: flex; align-items: center; height: 34px; }
+.tl-row + .tl-row { border-top: 1px solid var(--border); }
+.tl-row.header { height: 26px; }
+.tl-label { position: sticky; left: 0; z-index: 3; width: var(--labelw); min-width: var(--labelw); height: 100%; display: flex; align-items: center; padding: 0 10px; font-size: 0.72rem; font-weight: 700; color: var(--gold-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--surface); border-right: 1px solid var(--border); }
+.tl-track { position: relative; height: 100%; flex: 0 0 auto; background-image: repeating-linear-gradient(90deg, var(--text-dim) 0, var(--text-dim) 1px, transparent 1px, transparent var(--dayw)); }
+.tl-row.header .tl-track { background-image: none; }
+.tl-daynum { position: absolute; top: 7px; font-size: 0.54rem; color: var(--text-muted); transform: translateX(3px); white-space: nowrap; pointer-events: none; }
+.tl-daynum.month { color: var(--gold); font-weight: 700; }
+.tl-bar { position: absolute; top: 6px; height: 22px; border-radius: 5px; box-shadow: 0 1px 4px rgba(0,0,0,0.4); min-width: 6px; }
+.tl-bar.game { background: linear-gradient(90deg,#ec5453,#a83232); }
+.tl-bar.chat { background: linear-gradient(90deg,#c8aa6e,#8a6d34); }
+.tl-bar.custom { background: linear-gradient(90deg,#0ac8b9,#077267); }
+.tl-bar.done { opacity: 0.4; }
+.tl-today { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--teal); z-index: 2; box-shadow: 0 0 6px var(--teal); }
+.tl-today-lbl { position: absolute; top: 0; font-size: 0.5rem; font-weight: 700; color: var(--teal); transform: translateX(4px); z-index: 2; }
+.tl-legend { display: flex; gap: 14px; padding: 8px 14px 2px; font-size: 0.6rem; color: var(--text-muted); }
+.tl-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.tl-dot { width: 10px; height: 10px; border-radius: 3px; }
+.tl-dot.game { background: #ec5453; } .tl-dot.chat { background: #c8aa6e; } .tl-dot.custom { background: #0ac8b9; }
+
+/* ---- Racha / forma ---- */
+.streak { display: inline-flex; gap: 3px; align-items: center; }
+.sdot { width: 15px; height: 15px; border-radius: 4px; font-size: 0.56rem; font-weight: 800; color: #fff; display: flex; align-items: center; justify-content: center; }
+.sdot.w { background: #1f7a4d; } .sdot.l { background: #9a3535; }
+.streak-lbl { font-size: 0.55rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-right: 2px; }
+
+/* ---- Leaderboard ---- */
+.lb-row { display: flex; align-items: center; gap: 11px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 13px; margin-bottom: 8px; }
+.lb-row.top1 { border-color: var(--gold-dim); background: linear-gradient(90deg, var(--gold-bg), var(--surface)); }
+.lb-pos { font-size: 1.05rem; font-weight: 800; color: var(--text-muted); width: 26px; text-align: center; flex-shrink: 0; }
+.lb-row.top1 .lb-pos { color: var(--gold); }
+.lb-icon { width: 38px; height: 38px; border-radius: 9px; background: var(--surface2); border: 1px solid var(--border); object-fit: cover; flex-shrink: 0; }
+.lb-main { flex: 1; min-width: 0; }
+.lb-name { font-size: 0.9rem; font-weight: 700; color: var(--gold-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-sub { font-size: 0.68rem; color: var(--text-muted); margin-top: 1px; }
+.lb-right { text-align: right; flex-shrink: 0; }
+.lb-wr { font-size: 0.95rem; font-weight: 700; }
+.lb-wr-lbl { font-size: 0.54rem; color: var(--text-muted); text-transform: uppercase; }
+
+/* ---- Premios / awards ---- */
+.award-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+.award { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px; }
+.award-emoji { font-size: 1.5rem; line-height: 1; }
+.award-title { font-size: 0.62rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 8px 0 3px; }
+.award-winner { font-size: 0.92rem; font-weight: 700; color: var(--gold-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.award-val { font-size: 0.68rem; color: var(--teal); margin-top: 1px; }
+
+/* ---- Ban ranking ---- */
+.br-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 7px; background: var(--surface); }
+.br-pos { font-weight: 800; color: var(--loss); width: 22px; text-align: center; }
+.br-name { flex: 1; font-size: 0.86rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.br-stat { font-size: 0.72rem; color: var(--text-muted); text-align: right; }
+.br-stat b { color: var(--text); }
+
+/* ---- Comparador ---- */
+.cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.cmp-col { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; text-align: center; }
+.cmp-name { font-size: 0.82rem; font-weight: 700; color: var(--gold-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmp-stat { margin-top: 10px; }
+.cmp-stat .v { font-size: 1.05rem; font-weight: 700; }
+.cmp-stat .l { font-size: 0.55rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.cmp-better { color: var(--win) !important; }
+
 /* ---- Screenshots ---- */
 .shot-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
 @media(min-width:440px){ .shot-grid { grid-template-columns: repeat(3,1fr); } }
@@ -217,11 +285,11 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 
     <!-- PLAYERS -->
     <section class="section active" data-sec="players">
-      <h1 class="page-title">Jugadores</h1>
-      <div class="page-sub">Stats del escuadrón · LAS</div>
+      <h1 class="page-title">Familiares</h1>
+      <div class="page-sub">Stats de la familia · LAS</div>
       <div id="playersCfg"></div>
       <div class="refresh-bar">
-        <button class="btn btn-teal btn-sm" id="addPlayerBtn">+ Agregar jugador</button>
+        <button class="btn btn-teal btn-sm" id="addPlayerBtn">+ Agregar familiar</button>
         <button class="btn btn-ghost btn-sm" id="refreshAllBtn">↻ Actualizar stats</button>
       </div>
       <div id="playersList"></div>
@@ -232,6 +300,7 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
       <h1 class="page-title">Baneos</h1>
       <div class="page-sub">Cuenta regresiva en vivo</div>
       <button class="btn btn-gold btn-block" id="addBanBtn" style="margin-bottom:16px">+ Registrar baneo</button>
+      <div id="banTimelineWrap"></div>
       <div id="bansActive"></div>
       <div id="bansDoneWrap"></div>
     </section>
@@ -242,6 +311,19 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
       <div class="page-sub">Galería compartida del grupo</div>
       <div id="shotsCfg"></div>
       <div class="shot-grid" id="shotGrid"></div>
+    </section>
+
+    <!-- RANKING -->
+    <section class="section" data-sec="ranking">
+      <h1 class="page-title">Ranking</h1>
+      <div class="page-sub">La tabla de la familia</div>
+      <div class="refresh-bar">
+        <span class="muted" id="rankNote"></span>
+        <button class="btn btn-teal btn-sm" id="compareBtn">⚔ Comparar</button>
+      </div>
+      <div id="leaderboard"></div>
+      <div id="awards"></div>
+      <div id="banRanking"></div>
     </section>
 
     <!-- SETTINGS -->
@@ -269,7 +351,11 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
   <nav id="tabs">
     <button class="tab-btn active" data-tab="players">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      Jugadores
+      Familiares
+    </button>
+    <button class="tab-btn" data-tab="ranking">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      Ranking
     </button>
     <button class="tab-btn" data-tab="bans">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>
@@ -442,7 +528,7 @@ function leaveApp(){
 
 function showConfigWarnings(){
   if (!RIOT_PROXY_URL) {
-    $("#playersCfg").innerHTML = `<div class="config-warn">ℹ Las stats automáticas de Riot están desactivadas (falta el proxy). Igual podés agregar jugadores y abrir su op.gg. Configurá <b>RIOT_PROXY_URL</b> para activar rango, winrate y partidas. Ver <b>SETUP.md</b>.</div>`;
+    $("#playersCfg").innerHTML = `<div class="config-warn">ℹ Las stats automáticas de Riot están desactivadas (falta el proxy). Igual podés agregar familiares y abrir su op.gg. Configurá <b>RIOT_PROXY_URL</b> para activar rango, winrate y partidas. Ver <b>SETUP.md</b>.</div>`;
   }
   if (!CLOUDINARY_OK) {
     $("#shotsCfg").innerHTML = `<div class="config-warn">ℹ Para subir capturas configurá <b>Cloudinary</b> (gratis, sin tarjeta): pegá <b>CLOUDINARY_CLOUD_NAME</b> y <b>CLOUDINARY_UPLOAD_PRESET</b> en index.html. Ver <b>SETUP.md</b>.</div>`;
@@ -456,11 +542,13 @@ function subscribeAll(){
   unsub.push(onSnapshot(query(collection(db,"players"), orderBy("createdAt","asc")), snap => {
     players = snap.docs.map(d => ({ id:d.id, ...d.data() }));
     renderPlayers();
+    renderRanking();
   }, err => console.error("players",err)));
 
   unsub.push(onSnapshot(query(collection(db,"bans"), orderBy("startAt","desc")), snap => {
     bans = snap.docs.map(d => ({ id:d.id, ...d.data() }));
     renderBans();
+    renderRanking();
   }, err => console.error("bans",err)));
 
   unsub.push(onSnapshot(query(collection(db,"screenshots"), orderBy("createdAt","desc")), snap => {
@@ -476,7 +564,7 @@ function renderPlayers(){
   const wrap = $("#playersList");
   wrap.innerHTML = "";
   if (!players.length) {
-    wrap.appendChild(el("div","empty",`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="7" r="4"/><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/></svg>Todavía no hay jugadores.<br>Agregá el primero del escuadrón.`));
+    wrap.appendChild(el("div","empty",`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="7" r="4"/><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/></svg>Todavía no hay familiares.<br>Agregá el primero de la familia.`));
     return;
   }
   for (const p of players) wrap.appendChild(playerCard(p));
@@ -521,6 +609,14 @@ function playerCard(p){
       <div class="pstat"><div class="v">${s.rank.wins}-${s.rank.losses}</div><div class="l">W-L</div></div>
       <div class="pstat"><div class="v">${s.kda ?? "—"}</div><div class="l">KDA</div></div>`;
     c.appendChild(row);
+  }
+  if (s?.matches?.length) {
+    const sf = el("div"); sf.style.cssText = "padding:8px 0 0;display:flex;align-items:center;gap:4px";
+    sf.appendChild(el("span","streak-lbl","Forma:"));
+    const str = el("span","streak");
+    for (const m of s.matches.slice(0,5)) str.appendChild(el("span",`sdot ${m.win?"w":"l"}`,m.win?"V":"D"));
+    sf.appendChild(str);
+    c.appendChild(sf);
   }
   c.onclick = () => openPlayerDetail(p);
   return c;
@@ -583,7 +679,7 @@ function openPlayerDetail(p){
   $("#pDelete").onclick = async () => {
     if (!confirm(`¿Eliminar a ${p.gameName}? Esto borra sus stats guardadas.`)) return;
     await deleteDoc(doc(db,"players",p.id));
-    closeModal(); toast("Jugador eliminado");
+    closeModal(); toast("Familiar eliminado");
   };
   $("#pEdit").onclick = () => openPlayerForm(p);
 }
@@ -591,9 +687,9 @@ function openPlayerDetail(p){
 function openPlayerForm(existing){
   const e = existing || {};
   const body = `<div class="modal-grip"></div>
-    <div class="modal-title">${existing ? "Editar jugador" : "Agregar jugador"}</div>
+    <div class="modal-title">${existing ? "Editar familiar" : "Agregar familiar"}</div>
     <div class="modal-sub">Riot ID = nombre + tag (ej: Faker#KR1)</div>
-    <label class="field-label">Apodo en el grupo (opcional)</label>
+    <label class="field-label">Apodo en la familia (opcional)</label>
     <input id="fDisplay" placeholder="Cómo lo conocen" value="${esc(e.displayName||"")}">
     <label class="field-label">Nombre del invocador</label>
     <input id="fName" placeholder="GameName" value="${esc(e.gameName||"")}">
@@ -617,7 +713,7 @@ function openPlayerForm(existing){
           createdAt: serverTimestamp(), cachedStats: null
         });
       }
-      closeModal(); toast(existing?"Actualizado":"Jugador agregado");
+      closeModal(); toast(existing?"Actualizado":"Familiar agregado");
     } catch(err){ console.error(err); toast("Error al guardar"); btn.disabled=false; btn.textContent="Reintentar"; }
   };
 }
@@ -676,7 +772,84 @@ function fmtRemainingShort(b){
   return `${h}h ${m}m`;
 }
 
+function renderBanTimeline(){
+  const wrap = $("#banTimelineWrap");
+  wrap.innerHTML = "";
+  if (!bans.length) return;
+
+  const DAYW = 26, LABELW = 92, dayMs = 86400000;
+  const floorDay = ms => { const d = new Date(ms); d.setHours(0,0,0,0); return d.getTime(); };
+
+  // rango: del ban más viejo al más nuevo, incluyendo hoy, con aire a los costados
+  let minMs = Infinity, maxMs = -Infinity;
+  for (const b of bans){ minMs = Math.min(minMs, banStartMs(b)); maxMs = Math.max(maxMs, banEndMs(b)); }
+  const now = Date.now();
+  minMs = Math.min(minMs, now); maxMs = Math.max(maxMs, now);
+  const startDay = floorDay(minMs) - dayMs;
+  const endDay = floorDay(maxMs) + 2*dayMs;
+  const totalDays = Math.max(1, Math.round((endDay - startDay)/dayMs));
+  const trackW = totalDays * DAYW;
+  const xOf = ms => ((ms - startDay)/dayMs) * DAYW;
+
+  // agrupar baneos por familiar; ordenar por baneo más reciente
+  const groups = {};
+  for (const b of bans){ (groups[b.playerId] ||= []).push(b); }
+  const order = Object.keys(groups).sort((a,b) =>
+    Math.max(...groups[b].map(banEndMs)) - Math.max(...groups[a].map(banEndMs)));
+
+  const card = el("div","tl-card", `<div class="tl-title">Línea de tiempo de baneos</div>`);
+  const scroll = el("div","tl-scroll");
+  const inner = el("div","tl-inner");
+  inner.style.width = (LABELW + trackW) + "px";
+
+  // header con los días
+  const header = el("div","tl-row header");
+  header.appendChild(el("div","tl-label",""));
+  const htrack = el("div","tl-track"); htrack.style.width = trackW + "px";
+  for (let i=0;i<totalDays;i++){
+    const d = new Date(startDay + i*dayMs);
+    const first = d.getDate()===1 || i===0;
+    const num = el("div","tl-daynum"+(first?" month":""), first ? `${d.getDate()} ${MES3[d.getMonth()]}` : `${d.getDate()}`);
+    num.style.left = (i*DAYW) + "px";
+    htrack.appendChild(num);
+  }
+  header.appendChild(htrack);
+  inner.appendChild(header);
+
+  // una fila por familiar, baneos superpuestos en su carril
+  for (const pid of order){
+    const row = el("div","tl-row");
+    row.appendChild(el("div","tl-label", esc(playerLabel(pid, groups[pid][0].playerName))));
+    const track = el("div","tl-track"); track.style.width = trackW + "px";
+    for (const b of groups[pid]){
+      const cls = BAN_TYPES[b.type]?.cls || "custom";
+      const done = banRemainingMs(b) <= 0;
+      const bar = el("div", `tl-bar ${cls}${done?" done":""}`);
+      bar.style.left = xOf(banStartMs(b)) + "px";
+      bar.style.width = Math.max(6, ((b.durationHours||0)/24) * DAYW) + "px";
+      bar.title = `${playerLabel(pid,b.playerName)} · ${BAN_TYPES[b.type]?.label||b.type} · ${fmtDate(banStartMs(b))} → ${fmtDate(banEndMs(b))}`;
+      track.appendChild(bar);
+    }
+    row.appendChild(track);
+    inner.appendChild(row);
+  }
+
+  // línea de "hoy" (sobre todas las filas, corrida por el ancho de la etiqueta)
+  const todayX = LABELW + xOf(now);
+  const today = el("div","tl-today"); today.style.left = todayX + "px"; inner.appendChild(today);
+  const todayLbl = el("div","tl-today-lbl","HOY"); todayLbl.style.left = todayX + "px"; inner.appendChild(todayLbl);
+
+  const legend = el("div","tl-legend",
+    `<span><span class="tl-dot game"></span>Juego</span><span><span class="tl-dot chat"></span>Chat</span><span><span class="tl-dot custom"></span>Otro</span>`);
+
+  scroll.appendChild(inner); card.appendChild(scroll); card.appendChild(legend); wrap.appendChild(card);
+
+  // centrar la vista cerca de "hoy"
+  requestAnimationFrame(() => { scroll.scrollLeft = Math.max(0, todayX - scroll.clientWidth*0.6); });
+}
+
 function renderBans(){
+  renderBanTimeline();
   const active = bans.filter(b => banRemainingMs(b) > 0).sort((a,b)=>banEndMs(a)-banEndMs(b));
   const done = bans.filter(b => banRemainingMs(b) <= 0);
   const aw = $("#bansActive"); aw.innerHTML = "";
@@ -692,7 +865,7 @@ function renderBans(){
 
 function playerLabel(playerId, fallback){
   const p = players.find(x => x.id === playerId);
-  return p ? (p.displayName || p.gameName) : (fallback || "Jugador");
+  return p ? (p.displayName || p.gameName) : (fallback || "Familiar");
 }
 
 function banCard(b, isActive){
@@ -749,7 +922,7 @@ setInterval(() => {
 $("#addBanBtn").onclick = () => openBanForm();
 
 function openBanForm(){
-  if (!players.length){ toast("Agregá un jugador primero"); switchTab("players"); return; }
+  if (!players.length){ toast("Agregá un familiar primero"); switchTab("players"); return; }
   let banType = "game";
   let customHours = 72;
   const opts = players.map(p => `<option value="${p.id}">${esc(p.displayName||p.gameName)}</option>`).join("");
@@ -758,7 +931,7 @@ function openBanForm(){
   const body = `<div class="modal-grip"></div>
     <div class="modal-title">Registrar baneo</div>
     <div class="modal-sub">La cuenta regresiva arranca desde la fecha de inicio</div>
-    <label class="field-label">Jugador</label>
+    <label class="field-label">Familiar</label>
     <select id="bPlayer">${opts}</select>
     <label class="field-label">Tipo de baneo</label>
     <div class="seg" id="bSeg">
@@ -882,12 +1055,176 @@ function renderSettingsStatus(){
 }
 
 /* ============================================================
+   RANKING / LEADERBOARD / PREMIOS / COMPARADOR
+   ============================================================ */
+const TIER_ORDER = {CHALLENGER:9,GRANDMASTER:8,MASTER:7,DIAMOND:6,EMERALD:5,PLATINUM:4,GOLD:3,SILVER:2,BRONZE:1,IRON:0};
+const DIV_ORDER  = {I:3,II:2,III:1,IV:0};
+
+function rankScore(p){
+  const r = p.cachedStats?.rank;
+  if (!r?.tier) return -1;
+  return (TIER_ORDER[r.tier.toUpperCase()]??-1)*10000 + (DIV_ORDER[r.division?.toUpperCase()]??0)*1000 + (r.lp||0);
+}
+
+function renderRanking(){
+  renderLeaderboard();
+  renderAwards();
+  renderBanRankingTable();
+  const note = $("#rankNote");
+  if (note && players.length){
+    const n = players.filter(p=>!p.cachedStats?.rank).length;
+    note.textContent = n ? `${n} sin stats · actualizá en Familiares` : "";
+  }
+}
+
+function renderLeaderboard(){
+  const wrap = $("#leaderboard"); if (!wrap) return;
+  wrap.innerHTML = "";
+  if (!players.length){ wrap.innerHTML = `<div class="empty">Agregá familiares para ver el ranking.</div>`; return; }
+  const sorted = [...players].sort((a,b) => rankScore(b)-rankScore(a));
+  const card = el("div","card");
+  card.innerHTML = `<div class="card-label">Ranking de la familia</div>`;
+  sorted.forEach((p,i) => {
+    const s=p.cachedStats, r=s?.rank;
+    const wr = r&&(r.wins+r.losses) ? Math.round(r.wins/(r.wins+r.losses)*100) : null;
+    const row = el("div",`lb-row${i===0?" top1":""}`);
+    const ico = s?.profileIconId
+      ? `<img class="lb-icon" src="${ddIcon(s.profileIconId)}" onerror="this.style.visibility='hidden'">`
+      : `<div class="lb-icon player-icon-fallback">${esc(initials(p.displayName||p.gameName))}</div>`;
+    row.innerHTML = `
+      <div class="lb-pos">${["🥇","🥈","🥉"][i]||(i+1)}</div>
+      ${ico}
+      <div class="lb-main">
+        <div class="lb-name">${esc(p.displayName||p.gameName)}</div>
+        <div class="lb-sub">${r ? `${r.tier} ${r.division||""} · ${r.lp} LP` : "Sin datos de rango"}</div>
+      </div>
+      <div class="lb-right">
+        ${wr!==null ? `<div class="lb-wr ${wr>=50?"wr-good":"wr-bad"}">${wr}%</div><div class="lb-wr-lbl">Winrate</div>` : `<div class="lb-wr" style="color:var(--text-muted)">—</div>`}
+      </div>`;
+    row.onclick = () => openPlayerDetail(p);
+    card.appendChild(row);
+  });
+  wrap.appendChild(card);
+}
+
+function renderAwards(){
+  const wrap = $("#awards"); if (!wrap) return;
+  wrap.innerHTML = "";
+  const ws = players.filter(p => p.cachedStats?.rank);
+  if (ws.length < 2){ wrap.innerHTML = `<div class="empty" style="padding:18px 0">Los premios aparecen cuando hay 2+ familiares con stats cargadas.</div>`; return; }
+  const awards = [];
+
+  const byGames = [...ws].sort((a,b) => (b.cachedStats.rank.wins+b.cachedStats.rank.losses)-(a.cachedStats.rank.wins+a.cachedStats.rank.losses));
+  if (byGames.length) awards.push({e:"🏋️",t:"El más tryhard",w:byGames[0],v:`${byGames[0].cachedStats.rank.wins+byGames[0].cachedStats.rank.losses} partidas`});
+
+  const wk = ws.filter(p => p.cachedStats.kda && !isNaN(+p.cachedStats.kda));
+  const byKdaD = [...wk].sort((a,b) => +b.cachedStats.kda-+a.cachedStats.kda);
+  if (byKdaD.length) awards.push({e:"⚔️",t:"Mejor KDA",w:byKdaD[0],v:`${byKdaD[0].cachedStats.kda} KDA`});
+
+  const byKdaA = [...wk].sort((a,b) => +a.cachedStats.kda-+b.cachedStats.kda);
+  if (byKdaA.length && byKdaA[0].id !== byKdaD[0]?.id) awards.push({e:"💀",t:"Feeder oficial",w:byKdaA[0],v:`${byKdaA[0].cachedStats.kda} KDA`});
+
+  const byWr = [...ws].filter(p=>(p.cachedStats.rank.wins+p.cachedStats.rank.losses)>=10)
+    .sort((a,b)=>{const ra=a.cachedStats.rank,rb=b.cachedStats.rank;return rb.wins/(rb.wins+rb.losses)-ra.wins/(ra.wins+ra.losses);});
+  if (byWr.length) awards.push({e:"📈",t:"Mayor winrate",w:byWr[0],v:`${Math.round(byWr[0].cachedStats.rank.wins/(byWr[0].cachedStats.rank.wins+byWr[0].cachedStats.rank.losses)*100)}%`});
+
+  const wc = ws.filter(p => p.cachedStats.topChamps?.length);
+  if (wc.length){
+    const top = [...wc].sort((a,b)=>(b.cachedStats.topChamps[0]?.games||0)-(a.cachedStats.topChamps[0]?.games||0))[0];
+    awards.push({e:"🎯",t:`Main de ${top.cachedStats.topChamps[0].name}`,w:top,v:`${top.cachedStats.topChamps[0].games} partidas`});
+  }
+
+  const bp = {};
+  for (const b of bans) bp[b.playerId] = (bp[b.playerId]||0)+1;
+  const mb = players.filter(p=>bp[p.id]).sort((a,b)=>(bp[b.id]||0)-(bp[a.id]||0));
+  if (mb.length) awards.push({e:"🤡",t:"Más baneado",w:mb[0],v:`${bp[mb[0].id]} baneos`});
+
+  const card = el("div","card");
+  card.innerHTML = `<div class="card-label">Premios de la familia</div>`;
+  const grid = el("div","award-grid");
+  for (const a of awards.slice(0,6)){
+    const n = a.w.displayName||a.w.gameName;
+    const d = el("div","award");
+    d.innerHTML = `<div class="award-emoji">${a.e}</div><div class="award-title">${esc(a.t)}</div><div class="award-winner">${esc(n)}</div><div class="award-val">${esc(a.v)}</div>`;
+    grid.appendChild(d);
+  }
+  card.appendChild(grid);
+  wrap.appendChild(card);
+}
+
+function renderBanRankingTable(){
+  const wrap = $("#banRanking"); if (!wrap) return;
+  wrap.innerHTML = "";
+  if (!bans.length) return;
+  const stats = {};
+  for (const b of bans){
+    if (!stats[b.playerId]) stats[b.playerId] = {count:0,days:0,name:playerLabel(b.playerId,b.playerName)};
+    stats[b.playerId].count++;
+    stats[b.playerId].days += (b.durationHours||0)/24;
+  }
+  const sorted = Object.entries(stats).sort((a,b)=>b[1].days-a[1].days);
+  if (!sorted.length) return;
+  const card = el("div","card");
+  card.innerHTML = `<div class="card-label">🤡 Ranking de vergüenza</div>`;
+  sorted.forEach(([,s],i) => {
+    const row = el("div","br-row");
+    row.innerHTML = `<div class="br-pos">${i+1}</div><div class="br-name">${esc(s.name)}</div><div class="br-stat"><b>${s.count}</b> baneos · <b>${Math.round(s.days)}</b> días</div>`;
+    card.appendChild(row);
+  });
+  wrap.appendChild(card);
+}
+
+$("#compareBtn").onclick = () => openCompareModal();
+function openCompareModal(){
+  if (players.filter(p=>p.cachedStats?.rank).length < 2){ toast("Necesitás 2+ familiares con stats para comparar"); return; }
+  const opts = players.map(p=>`<option value="${p.id}">${esc(p.displayName||p.gameName)}</option>`).join("");
+  const body = `<div class="modal-grip"></div>
+    <div class="modal-title">⚔ Comparar familiares</div>
+    <div class="modal-sub">Elegí dos y enfrentalos</div>
+    <label class="field-label">Familiar A</label><select id="cmpA">${opts}</select>
+    <label class="field-label">Familiar B</label><select id="cmpB">${opts}</select>
+    <button class="btn btn-gold btn-block" id="cmpGo" style="margin-top:16px">⚔ Comparar</button>
+    <div id="cmpResult" style="margin-top:14px"></div>`;
+  openModal(body);
+  if (players[1]) $("#cmpB").value = players[1].id;
+
+  function doCompare(){
+    const pA=players.find(p=>p.id===$("#cmpA").value), pB=players.find(p=>p.id===$("#cmpB").value);
+    if (!pA||!pB||pA.id===pB.id){ $("#cmpResult").innerHTML=`<div class="empty" style="padding:14px">Elegí dos familiares distintos.</div>`; return; }
+    const sA=pA.cachedStats, sB=pB.cachedStats, rA=sA?.rank, rB=sB?.rank;
+    const wrA=rA&&(rA.wins+rA.losses)?Math.round(rA.wins/(rA.wins+rA.losses)*100):null;
+    const wrB=rB&&(rB.wins+rB.losses)?Math.round(rB.wins/(rB.wins+rB.losses)*100):null;
+    function statRow(l,vA,vB,hi=true){
+      const nA=parseFloat(vA),nB=parseFloat(vB),cmp=!isNaN(nA)&&!isNaN(nB);
+      return `<div class="cmp-grid" style="margin-bottom:8px">
+        <div class="cmp-col"><div class="cmp-stat"><div class="v ${cmp&&(hi?nA>nB:nA<nB)?"cmp-better":""}">${vA??'—'}</div><div class="l">${l}</div></div></div>
+        <div class="cmp-col"><div class="cmp-stat"><div class="v ${cmp&&(hi?nB>nA:nB<nA)?"cmp-better":""}">${vB??'—'}</div><div class="l">${l}</div></div></div>
+      </div>`;
+    }
+    let h = `<div class="cmp-grid" style="margin-bottom:12px">
+      <div class="cmp-col"><div class="cmp-name">${esc(pA.displayName||pA.gameName)}</div></div>
+      <div class="cmp-col"><div class="cmp-name">${esc(pB.displayName||pB.gameName)}</div></div></div>`;
+    h += statRow("Rango", rA?`${rA.tier} ${rA.division||""}`:null, rB?`${rB.tier} ${rB.division||""}`:null, false);
+    h += statRow("LP", rA?.lp, rB?.lp);
+    h += statRow("Winrate", wrA!==null?wrA+"%":null, wrB!==null?wrB+"%":null);
+    h += statRow("Victorias", rA?.wins, rB?.wins);
+    h += statRow("KDA promedio", sA?.kda, sB?.kda);
+    h += statRow("Partidas jugadas", rA?(rA.wins+rA.losses):null, rB?(rB.wins+rB.losses):null);
+    h += statRow("Baneos", bans.filter(b=>b.playerId===pA.id).length, bans.filter(b=>b.playerId===pB.id).length, false);
+    $("#cmpResult").innerHTML = h;
+  }
+  $("#cmpGo").onclick = doCompare;
+  doCompare();
+}
+
+/* ============================================================
    NAV / MODAL
    ============================================================ */
 function switchTab(name){
   $$(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
   $$(".section").forEach(s => s.classList.toggle("active", s.dataset.sec === name));
   $("#content").scrollTop = 0;
+  if (name === "ranking") renderRanking();
 }
 $$(".tab-btn").forEach(b => b.onclick = () => switchTab(b.dataset.tab));
 
