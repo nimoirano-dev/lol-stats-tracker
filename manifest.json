@@ -1,0 +1,13 @@
+{
+  "name": "La Buena Familia",
+  "short_name": "La Familia",
+  "description": "Stats, baneos y capturas de League of Legends de La Buena Familia",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#010a13",
+  "theme_color": "#010a13",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
