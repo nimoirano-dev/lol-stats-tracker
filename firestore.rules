@@ -1,0 +1,32 @@
+rules_version = '2';
+// Reglas de Firestore para La Buena Familia.
+// Modelo: datos COMPARTIDOS por todo el grupo.
+// Cualquier usuario logueado puede leer y escribir los datos del grupo;
+// solo quien creó un registro (o lo subió) puede borrarlo.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+
+    match /players/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update: if signedIn();
+      allow delete: if signedIn();
+    }
+
+    match /bans/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.createdBy == request.auth.uid;
+      allow update: if signedIn();
+      // borra el autor o cualquier miembro (grupo de amigos)
+      allow delete: if signedIn();
+    }
+
+    match /screenshots/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.uploadedBy == request.auth.uid;
+      allow delete: if signedIn() && resource.data.uploadedBy == request.auth.uid;
+    }
+  }
+}
