@@ -1277,7 +1277,7 @@ function renderAwards(){
   const bp = {};
   for (const b of bans) bp[b.playerId] = (bp[b.playerId]||0)+1;
   const mb = players.filter(p=>bp[p.id]).sort((a,b)=>(bp[b.id]||0)-(bp[a.id]||0));
-  if (mb.length) awards.push({e:"🤡",t:"Más baneado",w:mb[0],v:`${bp[mb[0].id]} baneos`});
+  if (mb.length) awards.push({e:"🪶",t:"Mejor poeta",w:mb[0],v:`${bp[mb[0].id]} baneos`});
 
   const card = el("div","card");
   card.innerHTML = `<div class="card-label">Premios de la familia</div>`;
