@@ -487,6 +487,8 @@ let players = [], bans = [], shots = [];
 let unsub = [];
 const liveGames = {};
 let playerSearchQ = "";
+let champById = {};
+const SPELL_NAMES = {1:"Cleanse",3:"Exhaust",4:"Flash",6:"Ghost",7:"Heal",11:"Smite",12:"Teleport",13:"Clarity",14:"Ignite",21:"Barrier",32:"Mark",39:"Hexflash"};
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -681,7 +683,7 @@ function playerCard(p){
     sf.appendChild(str);
     c.appendChild(sf);
   }
-  c.onclick = () => openPlayerDetail(p);
+  c.onclick = () => liveGames[p.id]?.inGame ? openLiveModal(p) : openPlayerDetail(p);
   return c;
 }
 
@@ -842,8 +844,8 @@ async function refreshPlayer(p, btn){
    BANEOS  +  CUENTA REGRESIVA
    ============================================================ */
 const BAN_TYPES = {
-  game: { label:"Juego", days:3, hours:72, cls:"game", desc:"3 días sin jugar" },
-  chat: { label:"Chat",  days:7, hours:168, cls:"chat", desc:"7 días sin all-chat" }
+  game: { label:"Juego",        days:3, hours:72,  cls:"game", desc:"3 días sin jugar" },
+  chat: { label:"Versión Demo", days:7, hours:168, cls:"chat", desc:"7 días modo demo" }
 };
 
 function banStartMs(b){
@@ -1049,12 +1051,7 @@ function openBanForm(){
     <label class="field-label">Tipo de baneo</label>
     <div class="seg" id="bSeg">
       <div class="seg-btn sel game" data-t="game">Juego<div class="seg-hint">3 días</div></div>
-      <div class="seg-btn chat" data-t="chat">Chat<div class="seg-hint">7 días</div></div>
-      <div class="seg-btn custom" data-t="custom">Otro<div class="seg-hint">custom</div></div>
-    </div>
-    <div id="bCustomWrap" style="display:none">
-      <label class="field-label">Duración en horas</label>
-      <input id="bHours" type="number" min="1" value="72">
+      <div class="seg-btn chat" data-t="chat">Versión Demo<div class="seg-hint">7 días</div></div>
     </div>
     <label class="field-label">Inicio del baneo</label>
     <input id="bStart" type="datetime-local" value="${localDT}">
@@ -1073,9 +1070,7 @@ function openBanForm(){
     const startStr = $("#bStart").value;
     if (!startStr){ toast("Poné la fecha de inicio"); return; }
     const startMs = new Date(startStr).getTime();
-    let durationHours, type = banType;
-    if (banType === "custom"){ durationHours = Math.max(1, +$("#bHours").value || 72); type = "custom"; }
-    else durationHours = BAN_TYPES[banType].hours;
+    let durationHours = BAN_TYPES[banType].hours, type = banType;
     const btn = $("#bSave"); btn.disabled = true; btn.innerHTML = `<span class="spinner"></span>`;
     try {
       await addDoc(collection(db,"bans"), {
@@ -1268,12 +1263,6 @@ function renderAwards(){
     .sort((a,b)=>{const ra=a.cachedStats.rank,rb=b.cachedStats.rank;return rb.wins/(rb.wins+rb.losses)-ra.wins/(ra.wins+ra.losses);});
   if (byWr.length) awards.push({e:"📈",t:"Mayor winrate",w:byWr[0],v:`${Math.round(byWr[0].cachedStats.rank.wins/(byWr[0].cachedStats.rank.wins+byWr[0].cachedStats.rank.losses)*100)}%`});
 
-  const wc = ws.filter(p => p.cachedStats.topChamps?.length);
-  if (wc.length){
-    const top = [...wc].sort((a,b)=>(b.cachedStats.topChamps[0]?.games||0)-(a.cachedStats.topChamps[0]?.games||0))[0];
-    awards.push({e:"🎯",t:`Main de ${top.cachedStats.topChamps[0].name}`,w:top,v:`${top.cachedStats.topChamps[0].games} partidas`});
-  }
-
   const bp = {};
   for (const b of bans) bp[b.playerId] = (bp[b.playerId]||0)+1;
   const mb = players.filter(p=>bp[p.id]).sort((a,b)=>(bp[b.id]||0)-(bp[a.id]||0));
@@ -1384,6 +1373,73 @@ function timeAgo(ms){
   if (s<86400) return `hace ${Math.floor(s/3600)} h`; return `hace ${Math.floor(s/86400)} d`;
 }
 window.timeAgo = timeAgo;
+
+/* ============================================================
+   PARTIDA EN VIVO
+   ============================================================ */
+async function loadChampById(){
+  if (Object.keys(champById).length > 0) return;
+  try {
+    const r = await fetch(`https://ddragon.leagueoflegends.com/cdn/${ddVersion}/data/en_US/champion.json`);
+    const d = await r.json();
+    for (const [, ch] of Object.entries(d.data)) champById[+ch.key] = ch.id;
+  } catch {}
+}
+
+async function openLiveModal(p){
+  const live = liveGames[p.id];
+  if (!live?.inGame){ openPlayerDetail(p); return; }
+
+  // Spinner mientras cargamos campeones
+  openModal(`<div class="modal-grip"></div><div class="modal-title">🟢 En partida…</div><div class="center-load"><div class="spinner"></div></div>`);
+  await loadChampById();
+
+  const myPuuid = p.cachedStats?.puuid;
+  const blue = (live.participants||[]).filter(x => x.teamId === 100);
+  const red  = (live.participants||[]).filter(x => x.teamId === 200);
+  const mins = Math.floor((live.duration||0)/60);
+  const secs = String((live.duration||0)%60).padStart(2,"0");
+
+  function ptRow(pt){
+    const champ  = champById[pt.championId] || "";
+    const isMine = pt.puuid === myPuuid;
+    const name   = pt.riotId?.split("#")[0] || "Jugador";
+    const sp1    = SPELL_NAMES[pt.spell1Id] || "";
+    const sp2    = SPELL_NAMES[pt.spell2Id] || "";
+    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);${isMine?"background:rgba(200,170,110,0.07);margin:0 -14px;padding-left:14px;padding-right:14px":""}">
+      ${champ
+        ? `<img style="width:36px;height:36px;border-radius:8px;flex-shrink:0" src="${champIcon(champ)}" onerror="this.style.visibility='hidden'">`
+        : `<div style="width:36px;height:36px;border-radius:8px;background:var(--surface2);flex-shrink:0"></div>`}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:0.84rem;font-weight:${isMine?700:500};color:${isMine?"var(--gold-bright)":"var(--text)"};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(name)}${isMine?" ◀":""}</div>
+        <div style="font-size:0.62rem;color:var(--text-muted)">${esc(champ||"?")}${sp1||sp2 ? ` · ${esc(sp1)}/${esc(sp2)}`:""}  </div>
+      </div>
+      ${pt.profileIconId ? `<img style="width:26px;height:26px;border-radius:50%;flex-shrink:0" src="${ddIcon(pt.profileIconId)}" onerror="this.style.display='none'">` : ""}
+    </div>`;
+  }
+
+  function team(participants, label, color){
+    if (!participants.length) return "";
+    return `<div style="font-size:0.6rem;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.07em;margin:12px 0 4px">${label}</div>
+      ${participants.map(ptRow).join("")}`;
+  }
+
+  const body = `<div class="modal-grip"></div>
+    <div class="modal-title">🟢 ${esc(p.displayName||p.gameName)} · En partida</div>
+    <div class="modal-sub">${esc(live.queue||"Partida")} · ${mins}:${secs} en curso</div>
+    <div class="card" style="padding:14px">
+      ${team(blue,"Equipo Azul","#5b9bd5")}
+      ${team(red, "Equipo Rojo","#ec5453")}
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" style="flex:1" id="liveBack">← Volver</button>
+      <button class="btn btn-gold" style="flex:1" id="liveProfile">Ver perfil</button>
+    </div>`;
+
+  openModal(body);
+  $("#liveBack").onclick  = closeModal;
+  $("#liveProfile").onclick = () => openPlayerDetail(p);
+}
 
 /* ============================================================
    COMENTARIOS EN CAPTURAS
