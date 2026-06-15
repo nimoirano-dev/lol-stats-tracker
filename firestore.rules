@@ -28,5 +28,11 @@ service cloud.firestore {
       allow create: if signedIn() && request.resource.data.uploadedBy == request.auth.uid;
       allow delete: if signedIn() && resource.data.uploadedBy == request.auth.uid;
     }
+
+    match /comments/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.authorId == request.auth.uid;
+      allow delete: if signedIn() && resource.data.authorId == request.auth.uid;
+    }
   }
 }
