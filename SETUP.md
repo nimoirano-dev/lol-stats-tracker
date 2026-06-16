@@ -20,7 +20,8 @@ Tiempo total: ~20–30 min. Todo gratis.
    **Email/Password** → Save.
 3. **Firestore Database** → *Create database* → modo **Production** → elegí la región
    más cercana (ej: `southamerica-east1`).
-4. **Storage** → *Get started* → aceptá las reglas por defecto (las cambiamos abajo).
+4. (NO hace falta activar **Storage** — las capturas van por Cloudinary en el Paso 3,
+   así no tenés que poner tarjeta ni activar el plan Blaze.)
 5. Engranaje ⚙ → **Project settings** → bajá hasta *Your apps* → ícono **</>** (Web) →
    registrá la app (ej: `lol-web`). Te muestra un objeto `firebaseConfig`. **Copialo.**
 
@@ -43,9 +44,9 @@ const firebaseConfig = {
 
 ### Cargá las reglas de seguridad
 - **Firestore → Rules**: pegá el contenido de [`firestore.rules`](firestore.rules) → *Publish*.
-- **Storage → Rules**: pegá el contenido de [`storage.rules`](storage.rules) → *Publish*.
 
-Con esto, solo usuarios logueados leen/escriben, y cada uno solo borra sus propias capturas.
+Con esto, solo usuarios logueados leen/escriben los datos del grupo.
+(El archivo `storage.rules` ya no se usa porque las capturas van por Cloudinary.)
 
 ---
 
@@ -66,19 +67,49 @@ En el celular pueden "Agregar a pantalla de inicio" para usarla como app (PWA).
 
 ---
 
-## Paso 3 — (Opcional) Stats automáticas con la Riot API
+## Paso 3 — (Opcional) Capturas con Cloudinary — gratis, sin tarjeta
+
+Firebase Storage exige el plan de pago (Blaze + tarjeta), así que para las capturas
+usamos **Cloudinary**, que es gratis (25 GB), no pide tarjeta y nunca te puede generar
+una factura. Sin este paso la app funciona igual; solo no vas a poder subir capturas.
+
+1. Creá una cuenta gratis en https://cloudinary.com (con email o con Google).
+2. En el **Dashboard** vas a ver tu **Cloud name** (ej: `dxxxxxx`). Anotalo.
+3. Creá un *upload preset* sin firma (para poder subir desde el navegador):
+   - Engranaje ⚙ (**Settings**) → pestaña **Upload** → bajá a **Upload presets** →
+     **Add upload preset**.
+   - En **Signing Mode** elegí **Unsigned**.
+   - (Opcional) en *Folder* poné `la-buena-familia` para tener las imágenes ordenadas.
+   - **Save**. Copiá el **nombre del preset** que quedó (ej: `ml_default` o el que pusiste).
+4. Pegá los dos valores en `index.html`, bloque CONFIGURACIÓN:
+
+```js
+const CLOUDINARY_CLOUD_NAME = "dxxxxxx";        // tu Cloud name
+const CLOUDINARY_UPLOAD_PRESET = "tu_preset";   // el preset unsigned
+```
+
+Subí el cambio a GitHub. Listo: la pestaña **Capturas** ya deja subir imágenes.
+
+> Cómo funciona: el navegador sube la imagen directo a Cloudinary con el preset
+> "unsigned", Cloudinary devuelve la URL y guardamos solo esa URL en Firestore.
+> Borrar una captura la saca de la galería; la imagen en sí queda en tu panel de
+> Cloudinary (se puede borrar a mano desde ahí si querés).
+
+---
+
+## Paso 4 — (Opcional) Stats automáticas con la Riot API
 
 Sin este paso, la app funciona igual: jugadores, baneos, capturas y botón a **op.gg**.
 Con este paso se "encienden" rango, winrate, KDA, campeones y últimas partidas dentro
 de la app.
 
-### 3a. Key de Riot
+### 4a. Key de Riot
 1. Entrá a https://developer.riotgames.com con tu cuenta de Riot.
 2. La **Development API Key** sirve para probar pero **expira cada 24 h**.
 3. Para algo estable pedí una **Personal API Key** (Register Product → Personal) — se
    aprueba en unos días y no expira.
 
-### 3b. Deploy del proxy (Cloudflare Worker, gratis y sin tarjeta)
+### 4b. Deploy del proxy (Cloudflare Worker, gratis y sin tarjeta)
 1. https://dash.cloudflare.com → **Workers & Pages** → *Create* → *Worker* → nombre →
    *Deploy* → *Edit code*.
 2. Borrá lo que haya y pegá el contenido de [`riot-proxy-worker.js`](riot-proxy-worker.js)
