@@ -111,6 +111,16 @@
 
 ---
 
+## v1.1 — Repo dentro de la bóveda y limpieza
+**Decisiones y razones:**
+- El proyecto se **movió a la bóveda de Obsidian** (`E:\Obsidian\Mi Base de Conocimiento\02 - Proyectos\La Buena Familia\lol-stats-tracker\`), saliendo de `C:\...\OneDrive\...\Code`.
+  - **Motivo:** eliminar la duplicación de docs entre la carpeta del código y Obsidian, y tener una sola fuente de verdad editable desde Obsidian y pusheable a GitHub desde la misma carpeta.
+  - **Backup:** pasa a ser GitHub en lugar de OneDrive.
+- **Docs consolidados:** `CHANGELOG_AI.md` y `PROJECT_CONTEXT.md` (en el repo) son la fuente de verdad. Las notas homónimas de Obsidian se convirtieron en **punteros** que enlazan a estas, para no romper backlinks existentes (ej: notas de cierre de sesión).
+- **`storage.rules` eliminado:** las capturas van por Cloudinary, no Firebase Storage, así que las reglas de Storage no se usaban.
+
+---
+
 ## Estado de deploys requeridos por el usuario
 
 Cada vez que se modifica `index.html` → subir a GitHub Pages (rama `main` o `gh-pages`).

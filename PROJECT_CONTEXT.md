@@ -1,5 +1,5 @@
 # PROJECT CONTEXT — La Buena Familia · LoL Tracker
-> Última actualización: 2026-06-15
+> Última actualización: 2026-06-17
 
 ---
 
@@ -41,6 +41,13 @@ lol-stats-tracker/
 ```
 
 > `riot-proxy-worker.js` se commitea al repo. El deploy al Worker de Cloudflare es automático vía GitHub Actions (`.github/workflows/deploy-worker.yml`) cuando se pushea a `main`.
+
+### Ubicación del repo y documentación
+
+- El repo vive **dentro de la bóveda de Obsidian**: `E:\Obsidian\Mi Base de Conocimiento\02 - Proyectos\La Buena Familia\lol-stats-tracker\`. Se edita en Obsidian y se pushea a GitHub desde la misma carpeta. (Antes estaba en `C:\...\OneDrive\...\Code`.)
+- **Backup = GitHub** (ya no OneDrive).
+- **Fuente de verdad única** de la doc: `CHANGELOG_AI.md` y `PROJECT_CONTEXT.md` viven en el repo. Las notas `La Buena Familia — Changelog AI.md` y `La Buena Familia — Project Context.md` de Obsidian son **punteros** que enlazan a estas (para no romper backlinks existentes).
+- `storage.rules` fue eliminado: las capturas van por Cloudinary, no Firebase Storage.
 
 ---
 
