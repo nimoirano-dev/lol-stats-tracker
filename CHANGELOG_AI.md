@@ -145,6 +145,12 @@
 
 ---
 
+## v1.4 — Cumplimiento de policy y control de acceso
+**Decisiones y razones:**
+- **Award "Feeder oficial" suavizado:** `💀 Feeder oficial · {kda} KDA` → `🎮 El kamikaze · juega al filo`. Se quitó el dato crudo de peor KDA para no "avergonzar por una métrica de rendimiento" (gray area de la policy de Riot). Se mantiene el tono de joke interno pero sin señalar el peor número.
+
+---
+
 ## Estado de deploys requeridos por el usuario
 
 Cada vez que se modifica `index.html` → subir a GitHub Pages (rama `main` o `gh-pages`).

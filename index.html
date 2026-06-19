@@ -1313,7 +1313,7 @@ function renderAwards(){
   if (byKdaD.length) awards.push({e:"⚔️",t:"Mejor KDA",w:byKdaD[0],v:`${byKdaD[0].cachedStats.kda} KDA`});
 
   const byKdaA = [...wk].sort((a,b) => +a.cachedStats.kda-+b.cachedStats.kda);
-  if (byKdaA.length && byKdaA[0].id !== byKdaD[0]?.id) awards.push({e:"💀",t:"Feeder oficial",w:byKdaA[0],v:`${byKdaA[0].cachedStats.kda} KDA`});
+  if (byKdaA.length && byKdaA[0].id !== byKdaD[0]?.id) awards.push({e:"🎮",t:"El kamikaze",w:byKdaA[0],v:`juega al filo`});
 
   const byWr = [...ws].filter(p=>(p.cachedStats.rank.wins+p.cachedStats.rank.losses)>=10)
     .sort((a,b)=>{const ra=a.cachedStats.rank,rb=b.cachedStats.rank;return rb.wins/(rb.wins+rb.losses)-ra.wins/(ra.wins+ra.losses);});
