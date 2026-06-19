@@ -70,7 +70,21 @@ const CLOUDINARY_UPLOAD_PRESET = "tcdrw58f";
 
 ---
 
+## Control de acceso
+
+App **privada para un grupo cerrado**. Dos capas:
+- **Capa 1:** auto-registro deshabilitado en Firebase Auth (Settings → User actions → "Enable create (sign-up)"). El admin crea las cuentas a mano.
+- **Capa 2:** las reglas de Firestore exigen `isMember()` = logueado **y** con email en `allowed/{email}`. Un usuario logueado pero fuera de la allowlist no puede leer ni escribir nada. La colección `allowed` solo se administra desde la consola de Firebase (escritura bloqueada para el cliente).
+
+---
+
 ## Colecciones de Firestore
+
+### `allowed/{email}`
+```
+(documento vacío)   El ID del doc es el email autorizado (minúsculas).
+                    Administrado solo desde la consola de Firebase.
+```
 
 ### `players/{id}`
 ```

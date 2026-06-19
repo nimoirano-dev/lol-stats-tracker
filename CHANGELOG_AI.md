@@ -148,6 +148,10 @@
 ## v1.4 — Cumplimiento de policy y control de acceso
 **Decisiones y razones:**
 - **Award "Feeder oficial" suavizado:** `💀 Feeder oficial · {kda} KDA` → `🎮 El kamikaze · juega al filo`. Se quitó el dato crudo de peor KDA para no "avergonzar por una métrica de rendimiento" (gray area de la policy de Riot). Se mantiene el tono de joke interno pero sin señalar el peor número.
+- **Control de acceso por allowlist (2 capas):** antes cualquier usuario logueado (`signedIn()`) podía leer/escribir, y Firebase permite auto-registro abierto → cualquiera con el link entraba.
+  - **Capa 1:** se bloquea el auto-registro en Firebase Auth (Settings → User actions → "Enable create (sign-up)" desmarcado). Las cuentas las crea el admin a mano.
+  - **Capa 2:** las reglas de Firestore ahora exigen `isMember()` = logueado **y** con email en la colección `allowed/{email}`. Aunque alguien se registre, sin estar en `allowed` no puede leer ni escribir nada. `allowed` no es editable desde el cliente (solo desde la consola).
+  - **Rollout:** primero poblar `allowed` con todos los emails actuales, recién después publicar las reglas (si no, se autobloquea el grupo).
 
 ---
 
