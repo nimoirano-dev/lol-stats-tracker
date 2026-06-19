@@ -486,6 +486,7 @@ let me = null;
 let players = [], bans = [], shots = [];
 let unsub = [];
 const liveGames = {};
+let liveFirstRun = true; // evita avisar de partidas ya en curso al cargar
 let playerSearchQ = "";
 let champById = {};
 const SPELL_NAMES = {1:"Cleanse",3:"Exhaust",4:"Flash",6:"Ghost",7:"Heal",11:"Smite",12:"Teleport",13:"Clarity",14:"Ignite",21:"Barrier",32:"Mark",39:"Hexflash"};
@@ -749,6 +750,25 @@ function openPlayerDetail(p){
     body += `<div class="empty" style="padding:24px">Sin stats cargadas todavía.<br>Tocá <b>Actualizar</b> para traerlas de Riot.</div>`;
   } else if (!RIOT_PROXY_URL) {
     body += `<div class="config-warn">Las stats automáticas requieren configurar el proxy de Riot. Por ahora podés ver el perfil completo en op.gg ↗</div>`;
+  }
+
+  // Historial de baneos del jugador ("carrera de poeta") — datos de Firestore, sin llamadas a la API
+  const pBans = bans.filter(b => b.playerId === p.id);
+  if (pBans.length){
+    const totalDays = Math.round(pBans.reduce((sum,b)=>sum+(b.durationHours||0)/24,0));
+    body += `<div class="divider"></div>
+      <div class="card-label">🪶 Carrera de poeta · ${pBans.length} baneos · ${totalDays} días</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">`;
+    for (const b of pBans.slice(0,10)){
+      const label = (b.durationHours||0) >= 168 ? "Versión Demo" : "Juego";
+      const d = new Date(b.startAt).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"2-digit"});
+      body += `<div style="display:flex;gap:8px;align-items:center;font-size:0.72rem">
+        <span style="color:var(--text-dim);min-width:62px">${d}</span>
+        <span style="font-weight:700">${label}</span>
+        ${b.note?`<span style="color:var(--text-muted)">· ${esc(b.note)}</span>`:""}
+      </div>`;
+    }
+    body += `</div>`;
   }
 
   if (s?.cachedAt) body += `<div style="text-align:center;font-size:0.66rem;color:var(--text-dim);margin:8px 0">Actualizado ${timeAgo(s.cachedAt)}</div>`;
@@ -1271,10 +1291,24 @@ function renderAwards(){
   const mb = players.filter(p=>bp[p.id]).sort((a,b)=>(bp[b.id]||0)-(bp[a.id]||0));
   if (mb.length) awards.push({e:"🪶",t:"Mejor poeta",w:mb[0],v:`${bp[mb[0].id]} baneos`});
 
+  // Premios desde las últimas partidas cacheadas (sin llamadas extra a la API)
+  const wm = ws.filter(p => Array.isArray(p.cachedStats.matches) && p.cachedStats.matches.length);
+  const avgOf = (ms,f) => ms.length ? ms.reduce((s,m)=>s+(+f(m)||0),0)/ms.length : 0;
+
+  const streakOf = p => { let n=0; for (const m of p.cachedStats.matches){ if (m.win) n++; else break; } return n; };
+  const byStreak = wm.map(p=>({p,n:streakOf(p)})).filter(x=>x.n>=2).sort((a,b)=>b.n-a.n);
+  if (byStreak.length) awards.push({e:"🔥",t:"En racha",w:byStreak[0].p,v:`${byStreak[0].n} victorias seguidas`});
+
+  const byCs = wm.map(p=>({p,v:avgOf(p.cachedStats.matches,m=>m.csPerMin)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  if (byCs.length) awards.push({e:"🎯",t:"El granjero",w:byCs[0].p,v:`${byCs[0].v.toFixed(1)} CS/min`});
+
+  const byVis = wm.map(p=>({p,v:avgOf(p.cachedStats.matches,m=>m.visionScore)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  if (byVis.length) awards.push({e:"👁️",t:"El centinela",w:byVis[0].p,v:`${Math.round(byVis[0].v)} de visión`});
+
   const card = el("div","card");
   card.innerHTML = `<div class="card-label">Premios de la familia</div>`;
   const grid = el("div","award-grid");
-  for (const a of awards.slice(0,6)){
+  for (const a of awards.slice(0,8)){
     const n = a.w.displayName||a.w.gameName;
     const d = el("div","award");
     d.innerHTML = `<div class="award-emoji">${a.e}</div><div class="award-title">${esc(a.t)}</div><div class="award-winner">${esc(n)}</div><div class="award-val">${esc(a.v)}</div>`;
@@ -1522,9 +1556,15 @@ async function checkLiveGames(){
     if (!puuid) continue;
     try {
       const r = await fetch(`${RIOT_PROXY_URL}/live?puuid=${encodeURIComponent(puuid)}&region=${REGION}`);
-      if (r.ok){ const d = await r.json(); liveGames[p.id] = d; }
+      if (r.ok){
+        const d = await r.json();
+        const was = liveGames[p.id]?.inGame;
+        liveGames[p.id] = d;
+        if (!liveFirstRun && d.inGame && !was) toast(`🔴 ${p.displayName||p.gameName} entró en partida`);
+      }
     } catch {}
   }
+  liveFirstRun = false;
   renderPlayers();
 }
 setInterval(checkLiveGames, 120000); // cada 2 minutos
