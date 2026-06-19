@@ -487,6 +487,8 @@ let players = [], bans = [], shots = [];
 let unsub = [];
 const liveGames = {};
 let liveFirstRun = true; // evita avisar de partidas ya en curso al cargar
+let keyExpiredShown = false; // banner de API key vencida (una sola vez)
+let autoRefreshDone = false; // auto-refresh de stats viejas (una sola vez por carga)
 let playerSearchQ = "";
 let champById = {};
 const SPELL_NAMES = {1:"Cleanse",3:"Exhaust",4:"Flash",6:"Ghost",7:"Heal",11:"Smite",12:"Teleport",13:"Clarity",14:"Ignite",21:"Barrier",32:"Mark",39:"Hexflash"};
@@ -606,6 +608,7 @@ function subscribeAll(){
     renderPlayers();
     renderRanking();
     checkLiveGames();
+    autoRefreshStale();
   }, err => console.error("players",err)));
 
   unsub.push(onSnapshot(query(collection(db,"bans"), orderBy("startAt","desc")), snap => {
@@ -848,7 +851,11 @@ async function refreshPlayer(p, btn){
   try {
     const url = `${RIOT_PROXY_URL}/profile?gameName=${encodeURIComponent(p.gameName)}&tagLine=${encodeURIComponent(p.tagLine)}&region=${REGION}`;
     const r = await fetch(url);
-    if (!r.ok) throw new Error("proxy "+r.status);
+    if (!r.ok){
+      let bodyTxt = ""; try { bodyTxt = JSON.stringify(await r.json()); } catch {}
+      if (r.status === 401 || r.status === 403 || /\b40[13]\b/.test(bodyTxt)) flagKeyExpired();
+      throw new Error("proxy "+r.status);
+    }
     const data = await r.json();
     data.cachedAt = Date.now();
     const lpEntry = data.rank ? { lp: data.rank.lp, tier: data.rank.tier, div: data.rank.division, ts: Date.now() } : null;
@@ -860,6 +867,32 @@ async function refreshPlayer(p, btn){
     toast("No se pudo actualizar (revisá el proxy)");
   } finally {
     if (btn){ btn.disabled = false; btn.textContent = "↻ Actualizar"; }
+  }
+}
+
+// Banner persistente cuando la API key de Riot venció / es inválida (401/403).
+function flagKeyExpired(){
+  if (keyExpiredShown) return;
+  keyExpiredShown = true;
+  const b = document.createElement("div");
+  b.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;background:#b3261e;color:#fff;font-size:0.76rem;font-weight:600;text-align:center;padding:9px 14px;box-shadow:0 2px 10px rgba(0,0,0,.45)";
+  b.innerHTML = `🔑 La API key de Riot venció o es inválida. Las stats no se actualizan hasta renovarla en el Worker (Cloudflare → Settings → Variables → <b>RIOT_API_KEY</b>). <span style="text-decoration:underline;cursor:pointer">cerrar</span>`;
+  b.querySelector("span").onclick = () => b.remove();
+  document.body.appendChild(b);
+}
+
+// Auto-refresh de stats viejas (>1h) al cargar. Throttleado y limitado para no rafaguear la Riot API.
+async function autoRefreshStale(){
+  if (autoRefreshDone || !RIOT_PROXY_URL) return;
+  autoRefreshDone = true;
+  const HOUR = 3600000;
+  const stale = players
+    .filter(p => p.cachedStats?.puuid && (Date.now() - (p.cachedStats.cachedAt || 0)) > HOUR)
+    .sort((a,b) => (a.cachedStats.cachedAt||0) - (b.cachedStats.cachedAt||0))
+    .slice(0, 5); // tope: máx 5 por carga (cada refresh ~13 llamadas) → bien debajo de 100/2min
+  for (const p of stale){
+    try { await refreshPlayer(p); } catch {}
+    await new Promise(res => setTimeout(res, 3000)); // separa las ráfagas
   }
 }
 
@@ -1578,6 +1611,9 @@ async function checkLiveGames(){
         const was = liveGames[p.id]?.inGame;
         liveGames[p.id] = d;
         if (!liveFirstRun && d.inGame && !was) toast(`🔴 ${p.displayName||p.gameName} entró en partida`);
+      } else {
+        let t = ""; try { t = JSON.stringify(await r.json()); } catch {}
+        if (r.status === 401 || r.status === 403 || /\b40[13]\b/.test(t)) flagKeyExpired();
       }
     } catch {}
   }

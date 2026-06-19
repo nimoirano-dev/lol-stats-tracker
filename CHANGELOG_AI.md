@@ -131,6 +131,20 @@
 
 ---
 
+## v1.3 — Mejoras de live, ranking y robustez
+**Decisiones y razones.** Lote de 6 mejoras; 5 de ellas con **cero llamadas extra** a la Riot API (clave dado el rate limit de 100 req/2min):
+
+- **🔔 Aviso al entrar en partida:** `checkLiveGames` compara el estado previo y dispara un toast cuando un familiar pasa a `inGame`. Flag `liveFirstRun` evita avisar de partidas ya en curso al cargar. (0 llamadas)
+- **🔑 Banner de API key vencida:** si el Worker responde 401/403 (o el body lo contiene), se muestra un banner fijo no intrusivo. Detección en `refreshPlayer` y en el polling `/live`. Frontend puro, sin tocar el Worker. (0 llamadas)
+- **📊 Carrera de poeta:** historial de baneos del jugador en el modal de detalle (`openPlayerDetail`), desde Firestore. (0 llamadas)
+- **🏆 Premios nuevos (positivos):** "En racha" (victorias seguidas), "El granjero" (mejor CS/min), "El centinela" (mejor visión), calculados desde `cachedStats.matches`. Se eligieron premios que **honran** (permitido por la policy de Riot) en vez de más "shame". (0 llamadas)
+- **🪶 Bans del draft en el modal en vivo:** el Worker `/live` ahora devuelve `bans` (de `bannedChampions`, que ya venían en la respuesta del spectator). El frontend los renderiza por equipo con íconos. (0 llamadas)
+- **⏱️ Auto-refresh de stats viejas:** al cargar, refresca jugadores con stats de >1h, **de a uno con 3s de pausa y tope de 5 por carga** (cada refresh ~13 llamadas) para quedar bien debajo de 100/2min. Flag `autoRefreshDone` para correr una sola vez.
+
+> **Decisión de scope:** el rango de cada participante en el modal en vivo se dejó **fuera** por ahora — serían ~10 llamadas extra por chequeo cada 2 min (riesgo de rate limit). Queda como posible carga bajo demanda al abrir el modal.
+
+---
+
 ## Estado de deploys requeridos por el usuario
 
 Cada vez que se modifica `index.html` → subir a GitHub Pages (rama `main` o `gh-pages`).

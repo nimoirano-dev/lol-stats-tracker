@@ -144,7 +144,8 @@ Retorna stats completas del jugador: cuenta, rango Solo, rango Flex, KDA, top ca
 
 ### `GET /live?puuid=X&region=las`
 Retorna si el invocador está en partida actualmente.
-- Si está: `{ inGame: true, queueId, queue, duration, gameMode, participants[] }`
+- Si está: `{ inGame: true, queueId, queue, duration, gameMode, participants[], bans[] }`
+  - `bans`: `[{ championId, teamId, pickTurn }]` — bans del draft (de `bannedChampions`, sin costo extra).
 - Si no está: `{ inGame: false }`
 - Cada `participant`: `{ teamId, puuid, riotId, championId, profileIconId, spell1Id, spell2Id }`
 
