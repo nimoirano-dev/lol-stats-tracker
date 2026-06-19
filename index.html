@@ -498,6 +498,8 @@ const esc = s => (s ?? "").toString().replace(/[&<>"']/g, c => ({ "&":"&amp;","<
 const toast = (msg) => { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2200); };
 const initials = s => (s||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();
 function opggUrl(p){ return `https://www.op.gg/summoners/${REGION}/${encodeURIComponent(p.gameName)}-${encodeURIComponent(p.tagLine)}`; }
+// Porofessor maneja todo el flujo de espectador (abre el cliente con el delay oficial de ~3 min).
+function spectateUrl(p){ return `https://porofessor.gg/es/live/${REGION}/${encodeURIComponent(p.gameName)}-${encodeURIComponent(p.tagLine)}`; }
 function ddIcon(id){ return `https://ddragon.leagueoflegends.com/cdn/${ddVersion}/img/profileicon/${id}.png`; }
 function champIcon(name){ return `https://ddragon.leagueoflegends.com/cdn/${ddVersion}/img/champion/${name}.png`; }
 
@@ -703,6 +705,7 @@ function openPlayerDetail(p){
   let body = `<div class="modal-grip"></div>
     <div class="modal-title">${esc(p.displayName || p.gameName)}</div>
     <div class="modal-sub">${esc(p.gameName)}#${esc(p.tagLine)} · ${REGION.toUpperCase()}${s?.summonerLevel ? ` · Nv. ${s.summonerLevel}` : ""}${live?.inGame ? ` · <span style="color:var(--win)">🟢 En partida</span>` : ""}</div>
+    ${live?.inGame ? `<a class="btn btn-teal" style="width:100%;margin-bottom:8px" href="${spectateUrl(p)}" target="_blank" rel="noopener">🔴 Espectar partida en curso ↗</a>` : ""}
     <div class="btn-row" style="margin-bottom:14px">
       <a class="btn btn-teal" style="flex:1" href="${opggUrl(p)}" target="_blank" rel="noopener">Ver en op.gg ↗</a>
       ${RIOT_PROXY_URL ? `<button class="btn btn-gold" id="pRefresh" style="flex:1">↻ Actualizar</button>` : ""}
@@ -1431,6 +1434,7 @@ async function openLiveModal(p){
       ${team(blue,"Equipo Azul","#5b9bd5")}
       ${team(red, "Equipo Rojo","#ec5453")}
     </div>
+    <a class="btn btn-teal" style="width:100%;margin-bottom:8px" href="${spectateUrl(p)}" target="_blank" rel="noopener">🔴 Espectar en Porofessor ↗</a>
     <div class="btn-row">
       <button class="btn btn-ghost" style="flex:1" id="liveBack">← Volver</button>
       <button class="btn btn-gold" style="flex:1" id="liveProfile">Ver perfil</button>

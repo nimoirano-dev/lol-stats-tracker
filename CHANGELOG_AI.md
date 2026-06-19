@@ -122,6 +122,15 @@
 
 ---
 
+## v1.2 — Botón "Espectar" (Porofessor)
+**Decisiones y razones:**
+- Se agregó botón **🔴 Espectar** que abre `porofessor.gg/es/live/{region}/{gameName}-{tagLine}` en una pestaña nueva.
+  - **Motivo:** ver la partida "en directo" requiere el modo espectador del cliente de League (Riot no da stream de video embebible). Porofessor ya resuelve todo ese flujo (abre el cliente con el delay oficial de ~3 min). Se eligió esta opción sobre lanzar el cliente nativo a mano (frágil, solo Windows, requiere ruta del `LeagueClient`).
+- **Ubicación:** botón prominente en el modal de partida en vivo (`openLiveModal`) + botón condicional en el detalle del jugador (`openPlayerDetail`), visible solo si `liveGames[p.id].inGame`.
+- Helper `spectateUrl(p)` junto a `opggUrl(p)`.
+
+---
+
 ## Estado de deploys requeridos por el usuario
 
 Cada vez que se modifica `index.html` → subir a GitHub Pages (rama `main` o `gh-pages`).
