@@ -72,9 +72,12 @@ const CLOUDINARY_UPLOAD_PRESET = "tcdrw58f";
 
 ## Control de acceso
 
-App **privada para un grupo cerrado**. Dos capas:
-- **Capa 1:** auto-registro deshabilitado en Firebase Auth (Settings → User actions → "Enable create (sign-up)"). El admin crea las cuentas a mano.
-- **Capa 2:** las reglas de Firestore exigen `isMember()` = logueado **y** con email en `allowed/{email}`. Un usuario logueado pero fuera de la allowlist no puede leer ni escribir nada. La colección `allowed` solo se administra desde la consola de Firebase (escritura bloqueada para el cliente).
+App **privada para un grupo cerrado**, con flujo **solicitud → aprobación**:
+
+- **Registro abierto**, pero un no-miembro cae en pantalla **"Acceso pendiente"** al entrar. Se crea `accessRequests/{uid}` y se avisa al admin por **Discord** (Worker `POST /access-request` → `DISCORD_WEBHOOK_URL`).
+- **Admin** (`nimoirano@gmail.com`, hardcodeado en reglas `isAdmin()` y en la app `ADMIN_EMAIL`) ve las solicitudes en **Ajustes → Solicitudes** y las Aprueba/Rechaza. Aprobar escribe `allowed/{email}`.
+- **Barrera de datos:** las reglas exigen `isMember()` = admin **o** email en `allowed/{email}`. Un logueado fuera de la allowlist no lee ni escribe nada.
+- **Gotcha:** el ID de doc en `allowed` debe ser el email **exacto** del token (las reglas no pueden bajar a minúsculas). Al cargar emails a mano, copiarlos tal cual de Authentication → Users.
 
 ---
 
@@ -82,9 +85,22 @@ App **privada para un grupo cerrado**. Dos capas:
 
 ### `allowed/{email}`
 ```
-(documento vacío)   El ID del doc es el email autorizado (minúsculas).
-                    Administrado solo desde la consola de Firebase.
+name            string     Nombre (lo escribe el admin al aprobar; opcional)
+approvedAt      Timestamp
+approvedBy      string     Email del admin
 ```
+> El ID del doc es el email **exacto** del miembro. Lo escribe el admin (al aprobar
+> o a mano en la consola). Lectura: el propio dueño o el admin.
+
+### `accessRequests/{uid}`
+```
+email           string     Email del solicitante
+name            string     Nombre (displayName)
+status          string     "pending" | "approved" | "rejected"
+createdAt       Timestamp
+```
+> El ID del doc es el `uid` del solicitante. Lo crea el propio usuario al quedar
+> pendiente; solo el admin lo lee/resuelve. Al crearse, dispara el aviso a Discord.
 
 ### `players/{id}`
 ```
@@ -163,7 +179,10 @@ Retorna si el invocador está en partida actualmente.
 - Si no está: `{ inGame: false }`
 - Cada `participant`: `{ teamId, puuid, riotId, championId, profileIconId, spell1Id, spell2Id }`
 
-**Variable de entorno requerida en Cloudflare:** `RIOT_API_KEY`
+### `POST /access-request`
+Body `{ email, name }`. Reenvía un embed a Discord (`DISCORD_WEBHOOK_URL`) avisando que alguien solicitó acceso. No usa la Riot API. Lo llama el frontend al crear una `accessRequests`.
+
+**Secrets requeridos en Cloudflare:** `RIOT_API_KEY` (Riot API) · `DISCORD_WEBHOOK_URL` (aviso de accesos).
 
 ---
 

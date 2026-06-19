@@ -155,6 +155,19 @@
 
 ---
 
+## v1.5 — Solicitud de acceso con aprobación + aviso a Discord
+**Decisiones y razones.** Evoluciona el control de acceso de v1.4: en vez de cargar la allowlist solo a mano, ahora hay un flujo **request → approve** in-app.
+
+- **Flujo:** un no-miembro **puede registrarse** (el auto-registro queda **habilitado**, a diferencia de la "Capa 1" de v1.4 que ahora NO se aplica), pero al entrar cae en una pantalla **"Acceso pendiente"**. Se crea `accessRequests/{uid}` (`status: pending`). El admin ve las solicitudes en **Ajustes → Solicitudes** y las **Aprueba/Rechaza**. Aprobar escribe `allowed/{email}` y marca `approved`.
+- **Notificación:** al crear la solicitud (una sola vez), el frontend pega a un nuevo endpoint del Worker `POST /access-request`, que reenvía un embed a **Discord** usando el secret `DISCORD_WEBHOOK_URL`. La URL del webhook **no** va en el repo (es público) — vive como secret en Cloudflare, igual que `RIOT_API_KEY`.
+- **Admin:** identificado por email hardcodeado (`nimoirano@gmail.com`) tanto en las reglas (`isAdmin()`) como en la app (`ADMIN_EMAIL`). El admin es miembro automático (no necesita estar en `allowed`).
+- **Reglas:** `accessRequests` → un logueado crea/lee solo la suya, el admin lee y resuelve todas; `allowed` → escritura solo del admin (antes era solo consola).
+- **Gotcha de emails:** las reglas de Firestore no pueden pasar strings a minúsculas, así que el ID de doc en `allowed` debe coincidir **exactamente** (capitalización incluida) con el email del token. El código usa `me.email` exacto en todos lados; al poblar `allowed` a mano hay que copiar el email tal cual aparece en Authentication → Users.
+
+> **Cambio respecto a v1.4:** la "Capa 1" (deshabilitar auto-registro) queda **descartada** — este flujo necesita el registro abierto para que la gente pueda solicitar acceso. La allowlist (Capa 2) sigue siendo la barrera real de datos.
+
+---
+
 ## Estado de deploys requeridos por el usuario
 
 Cada vez que se modifica `index.html` → subir a GitHub Pages (rama `main` o `gh-pages`).

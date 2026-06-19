@@ -386,6 +386,10 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
         <div class="card-label">Estado de la conexión</div>
         <div id="meStatus" style="font-size:0.82rem;line-height:1.7"></div>
       </div>
+      <div class="card" id="adminRequests" style="display:none">
+        <div class="card-label">🔐 Solicitudes de acceso</div>
+        <div id="adminRequestsList" style="font-size:0.82rem"></div>
+      </div>
       <button class="btn btn-danger btn-block" id="logoutBtn" style="margin-top:8px">Cerrar sesión</button>
       <div style="text-align:center;font-size:0.66rem;color:var(--text-dim);margin-top:20px">La Buena Familia · v1.0</div>
     </section>
@@ -481,8 +485,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const CONFIGURED = !!firebaseConfig.apiKey;
 const CLOUDINARY_OK = !!CLOUDINARY_CLOUD_NAME && !!CLOUDINARY_UPLOAD_PRESET;
+const ADMIN_EMAIL = "nimoirano@gmail.com"; // aprueba solicitudes y administra la allowlist
 let app, auth, db, ddVersion = "15.11.1";
-let me = null;
+let me = null, isAdminUser = false, unsubRequests = null;
 let players = [], bans = [], shots = [];
 let unsub = [];
 const liveGames = {};
@@ -573,7 +578,22 @@ function authErrMsg(code){
 
 $("#logoutBtn").onclick = () => signOut(auth);
 
-function enterApp(){
+async function enterApp(){
+  const email = me.email || ""; // email exacto del token (las reglas comparan sin poder bajar a minúsculas)
+  isAdminUser = email.toLowerCase() === ADMIN_EMAIL;
+
+  // Gate de acceso: admin o email en la allowlist → entra; si no, queda pendiente de aprobación.
+  let member = isAdminUser;
+  if (!member){
+    try { member = (await getDoc(doc(db,"allowed",email))).exists(); } catch {}
+  }
+  if (!member){
+    await ensureAccessRequest();
+    showPendingScreen();
+    return;
+  }
+
+  if ($("#pending")) $("#pending").style.display = "none";
   $("#auth").style.display = "none";
   $("#app").style.display = "flex";
   $("#meName").textContent = me.displayName || me.email.split("@")[0];
@@ -582,12 +602,99 @@ function enterApp(){
   renderSettingsStatus();
   showConfigWarnings();
   subscribeAll();
+  if (isAdminUser) subscribeAccessRequests();
+}
+
+// Crea la solicitud de acceso (una sola vez) y avisa al admin por Discord vía el Worker.
+async function ensureAccessRequest(){
+  const email = me.email || "";
+  const ref = doc(db,"accessRequests", me.uid);
+  let existed = false;
+  try { existed = (await getDoc(ref)).exists(); } catch {}
+  if (existed) return;
+  try {
+    await setDoc(ref, { email, name: me.displayName || "", status:"pending", createdAt: serverTimestamp() });
+    if (RIOT_PROXY_URL){
+      fetch(`${RIOT_PROXY_URL}/access-request`, {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ email, name: me.displayName || "" })
+      }).catch(()=>{});
+    }
+  } catch(err){ console.error("accessRequest", err); }
+}
+
+function showPendingScreen(){
+  $("#auth").style.display = "none";
+  $("#app").style.display = "none";
+  let p = $("#pending");
+  if (!p){
+    p = document.createElement("div");
+    p.id = "pending";
+    p.style.cssText = "min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px";
+    p.innerHTML = `<div style="font-size:3rem">⏳</div>
+      <div style="font-size:1.1rem;font-weight:700">Acceso pendiente de aprobación</div>
+      <div style="color:var(--text-muted);max-width:320px;line-height:1.5">Tu solicitud le llegó al admin. Cuando te apruebe vas a poder entrar — volvé a iniciar sesión más tarde.</div>
+      <button class="btn btn-ghost" id="pendingLogout" style="margin-top:6px">Cerrar sesión</button>`;
+    document.body.appendChild(p);
+    p.querySelector("#pendingLogout").onclick = () => signOut(auth);
+  }
+  p.style.display = "flex";
 }
 function leaveApp(){
   unsub.forEach(u => u && u()); unsub = [];
+  if (unsubRequests){ unsubRequests(); unsubRequests = null; }
   players = []; bans = []; shots = [];
   $("#app").style.display = "none";
+  if ($("#pending")) $("#pending").style.display = "none";
   $("#auth").style.display = "flex";
+}
+
+// Panel de admin: lista de solicitudes pendientes con Aprobar / Rechazar.
+function subscribeAccessRequests(){
+  if (unsubRequests) return;
+  const card = $("#adminRequests");
+  if (card) card.style.display = "";
+  unsubRequests = onSnapshot(
+    query(collection(db,"accessRequests"), where("status","==","pending")),
+    snap => {
+      const reqs = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      renderAdminRequests(reqs);
+    },
+    err => console.error("accessRequests", err)
+  );
+}
+
+function renderAdminRequests(reqs){
+  const list = $("#adminRequestsList"); if (!list) return;
+  if (!reqs.length){ list.innerHTML = `<div style="color:var(--text-muted);padding:4px 0">No hay solicitudes pendientes.</div>`; return; }
+  list.innerHTML = "";
+  for (const r of reqs){
+    const row = el("div","");
+    row.style.cssText = "display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)";
+    row.innerHTML = `<div style="flex:1;min-width:0">
+        <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.name||"Sin nombre")}</div>
+        <div style="font-size:0.7rem;color:var(--text-muted)">${esc(r.email||"")}</div>
+      </div>
+      <button class="btn btn-gold btn-sm" data-act="ok">Aprobar</button>
+      <button class="btn btn-ghost btn-sm" data-act="no">Rechazar</button>`;
+    row.querySelector('[data-act="ok"]').onclick = () => approveRequest(r);
+    row.querySelector('[data-act="no"]').onclick = () => rejectRequest(r);
+    list.appendChild(row);
+  }
+}
+
+async function approveRequest(r){
+  try {
+    await setDoc(doc(db,"allowed", r.email||""), { name:r.name||"", approvedAt: serverTimestamp(), approvedBy: me.email });
+    await updateDoc(doc(db,"accessRequests", r.id), { status:"approved" });
+    toast(`${r.name||r.email} aprobado`);
+  } catch(err){ console.error(err); toast("No se pudo aprobar"); }
+}
+async function rejectRequest(r){
+  try {
+    await updateDoc(doc(db,"accessRequests", r.id), { status:"rejected" });
+    toast(`Solicitud rechazada`);
+  } catch(err){ console.error(err); toast("No se pudo rechazar"); }
 }
 
 function showConfigWarnings(){

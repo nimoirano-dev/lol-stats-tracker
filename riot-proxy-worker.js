@@ -39,10 +39,37 @@ export default {
     const origin = env.ALLOWED_ORIGIN || "*";
     const cors = {
       "Access-Control-Allow-Origin": origin,
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
     if (request.method === "OPTIONS") return new Response(null, { headers: cors });
+
+    /* ---- /access-request : avisa a Discord (no usa RIOT_API_KEY) ---- */
+    if (new URL(request.url).pathname === "/access-request") {
+      if (request.method !== "POST") return json({ error: "Usá POST" }, 405, cors);
+      if (!env.DISCORD_WEBHOOK_URL) return json({ error: "Falta DISCORD_WEBHOOK_URL" }, 500, cors);
+      try {
+        const body = await request.json();
+        const email = String(body.email || "").slice(0, 120);
+        const name  = String(body.name  || "").slice(0, 80);
+        await fetch(env.DISCORD_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            embeds: [{
+              title: "🔐 Nueva solicitud de acceso",
+              description: `**${name || "Sin nombre"}** quiere entrar a La Buena Familia`,
+              fields: [{ name: "Email", value: email || "—" }],
+              color: 0xc8aa6e,
+            }],
+          }),
+        });
+        return json({ ok: true }, 200, cors);
+      } catch (err) {
+        return json({ error: String(err.message) }, 502, cors);
+      }
+    }
+
     if (!env.RIOT_API_KEY) return json({ error: "Falta RIOT_API_KEY en el worker" }, 500, cors);
 
     const url = new URL(request.url);

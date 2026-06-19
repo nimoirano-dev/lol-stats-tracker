@@ -12,16 +12,28 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'nimoirano@gmail.com';
+    }
+
     function isMember() {
       return request.auth != null
         && request.auth.token.email != null
-        && exists(/databases/$(database)/documents/allowed/$(request.auth.token.email));
+        && (isAdmin()
+            || exists(/databases/$(database)/documents/allowed/$(request.auth.token.email)));
     }
 
-    // Allowlist: solo lectura del propio registro; escritura bloqueada (se hace en la consola).
+    // Allowlist: el dueño lee su propio registro; el admin lee/escribe todo (aprueba accesos).
     match /allowed/{email} {
-      allow read: if request.auth != null && request.auth.token.email == email;
-      allow write: if false;
+      allow read:  if isAdmin() || (request.auth != null && request.auth.token.email == email);
+      allow write: if isAdmin();
+    }
+
+    // Solicitudes de acceso: un logueado crea/lee SOLO la suya; el admin las ve y resuelve.
+    match /accessRequests/{uid} {
+      allow read:   if isAdmin() || (request.auth != null && request.auth.uid == uid);
+      allow create: if request.auth != null && request.auth.uid == uid;
+      allow update, delete: if isAdmin();
     }
 
     match /players/{id} {
