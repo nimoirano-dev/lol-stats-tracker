@@ -93,6 +93,7 @@
 ### "Más baneado" → "Mejor poeta" (🪶)
 - **Motivo:** el grupo prefería un término irónico/literario. "Poeta" en jerga argentina refiere a alguien que "escribe" mucho en el chat (habla de más).
 - **Cambio:** emoji cambió de 🤡 a 🪶, label de "Más baneado" a "Mejor poeta".
+- **Seguimiento (2026-06-17):** el card "🤡 Ranking de vergüenza" se renombró a "🪶 Ranking de Poetas Contemporáneos" para mantener la coherencia con el award "Mejor poeta".
 
 ### Eliminación del award "Main de campeón"
 - **Motivo:** la lógica que mostraba el campeón más jugado no tenía suficiente contexto (era de las últimas 10 partidas, no el "main" real).

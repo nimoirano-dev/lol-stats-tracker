@@ -1294,7 +1294,7 @@ function renderBanRankingTable(){
   const sorted = Object.entries(stats).sort((a,b)=>b[1].days-a[1].days);
   if (!sorted.length) return;
   const card = el("div","card");
-  card.innerHTML = `<div class="card-label">🤡 Ranking de vergüenza</div>`;
+  card.innerHTML = `<div class="card-label">🪶 Ranking de Poetas Contemporáneos</div>`;
   sorted.forEach(([,s],i) => {
     const row = el("div","br-row");
     row.innerHTML = `<div class="br-pos">${i+1}</div><div class="br-name">${esc(s.name)}</div><div class="br-stat"><b>${s.count}</b> baneos · <b>${Math.round(s.days)}</b> días</div>`;
