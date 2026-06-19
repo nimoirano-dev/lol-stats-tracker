@@ -1461,12 +1461,29 @@ async function openLiveModal(p){
       ${participants.map(ptRow).join("")}`;
   }
 
+  function bansStrip(){
+    const bans = live.bans || [];
+    if (!bans.length) return "";
+    const icons = teamId => bans.filter(b => b.teamId === teamId).map(b => {
+      const champ = champById[b.championId] || "";
+      return champ ? `<img title="${esc(champ)}" style="width:24px;height:24px;border-radius:5px;filter:grayscale(0.4);opacity:.85" src="${champIcon(champ)}" onerror="this.style.display='none'">` : "";
+    }).join("");
+    const blueB = icons(100), redB = icons(200);
+    if (!blueB && !redB) return "";
+    return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+      <div style="display:flex;gap:4px;flex-wrap:wrap">${blueB}</div>
+      <span style="font-size:0.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em">Bans</span>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${redB}</div>
+    </div>`;
+  }
+
   const body = `<div class="modal-grip"></div>
     <div class="modal-title">🟢 ${esc(p.displayName||p.gameName)} · En partida</div>
     <div class="modal-sub">${esc(live.queue||"Partida")} · ${mins}:${secs} en curso</div>
     <div class="card" style="padding:14px">
       ${team(blue,"Equipo Azul","#5b9bd5")}
       ${team(red, "Equipo Rojo","#ec5453")}
+      ${bansStrip()}
     </div>
     <a class="btn btn-teal" style="width:100%;margin-bottom:8px" href="${spectateUrl(p)}" target="_blank" rel="noopener">🔴 Espectar en Porofessor ↗</a>
     <div class="btn-row">

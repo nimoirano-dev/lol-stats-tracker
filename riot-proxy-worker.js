@@ -70,6 +70,10 @@ export default {
           spell1Id:     p.spell1Id,
           spell2Id:     p.spell2Id,
         }));
+        // Bans del draft (vienen en la misma respuesta del spectator, sin costo extra). -1 = sin baneo.
+        const bans = (data.bannedChampions || [])
+          .filter(b => b.championId > 0)
+          .map(b => ({ championId: b.championId, teamId: b.teamId, pickTurn: b.pickTurn }));
         return json({
           inGame: true,
           queueId:  data.gameQueueConfigId,
@@ -77,6 +81,7 @@ export default {
           duration: data.gameLength,
           gameMode: data.gameMode,
           participants,
+          bans,
         }, 200, cors);
       } catch (err) {
         if (String(err.message).includes("404")) return json({ inGame: false }, 200, cors);
