@@ -168,6 +168,15 @@
 
 ---
 
+## v1.6 — Rango de participantes en vivo + tope de auto-refresh
+**Contexto de rate limit (importante):** la **Personal API Key** de Riot **no sube** el límite *de la app* — sigue siendo **20 req/seg y 100 req/2min** (solo deja de vencerse cada 24h). Los límites altos *por método* (ej. LEAGUE-V4 by-puuid 20k/10s) no cambian ese techo, que es el que manda. Subirlo de verdad requeriría una *Production Key* (otra solicitud).
+
+- **🪶 Rango de cada participante en el modal en vivo:** nuevo endpoint del Worker `GET /ranks?puuids=a,b,c&region=` que devuelve el rango Solo de hasta 10 PUUIDs. El frontend lo llama **on-demand al abrir el modal** (no en el polling), así las ~10 llamadas pasan una sola vez y entran cómodas en 100/2min. Cada fila de la partida muestra `Tier Div · LP` (o "Sin rango").
+  - Se mantuvo el criterio de v1.5: **no** se piden rangos durante el polling cada 2 min (eso sí reventaría el límite).
+- **⏱️ Tope de auto-refresh subido de 5 → 6** jugadores por carga. No se quita del todo: con ~14 llamadas por refresh, el techo de 100/2min obliga a dejar un límite.
+
+---
+
 ## Estado de deploys requeridos por el usuario
 
 Cada vez que se modifica `index.html` → subir a GitHub Pages (rama `main` o `gh-pages`).

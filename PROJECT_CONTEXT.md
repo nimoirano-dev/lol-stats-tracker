@@ -179,8 +179,13 @@ Retorna si el invocador está en partida actualmente.
 - Si no está: `{ inGame: false }`
 - Cada `participant`: `{ teamId, puuid, riotId, championId, profileIconId, spell1Id, spell2Id }`
 
+### `GET /ranks?puuids=a,b,c&region=las`
+Devuelve el rango Solo de hasta 10 PUUIDs: `{ ranks: { puuid: { tier, division, lp } | null } }`. Lo llama el frontend **on-demand al abrir el modal de partida en vivo** (no en el polling), para mostrar el rango de cada participante sin reventar el rate limit.
+
 ### `POST /access-request`
 Body `{ email, name }`. Reenvía un embed a Discord (`DISCORD_WEBHOOK_URL`) avisando que alguien solicitó acceso. No usa la Riot API. Lo llama el frontend al crear una `accessRequests`.
+
+> **Rate limit de la app (Personal Key):** 20 req/seg y 100 req/2min. La Personal Key no sube este techo (solo no vence); subirlo requiere Production Key.
 
 **Secrets requeridos en Cloudflare:** `RIOT_API_KEY` (Riot API) · `DISCORD_WEBHOOK_URL` (aviso de accesos).
 

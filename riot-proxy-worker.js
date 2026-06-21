@@ -116,6 +116,21 @@ export default {
       }
     }
 
+    /* ---- /ranks : rango Solo de varios jugadores (on-demand, para el modal en vivo) ---- */
+    if (url.pathname === "/ranks") {
+      const puuids = (url.searchParams.get("puuids") || "")
+        .split(",").map(s => s.trim()).filter(Boolean).slice(0, 10);
+      const ranks = {};
+      for (const puuid of puuids) {
+        try {
+          const entries = await rget(`https://${route.platform}.api.riotgames.com/lol/league/v4/entries/by-puuid/${encodeURIComponent(puuid)}`);
+          const solo = entries.find(e => e.queueType === "RANKED_SOLO_5x5");
+          ranks[puuid] = solo ? { tier: cap(solo.tier), division: solo.rank, lp: solo.leaguePoints } : null;
+        } catch { ranks[puuid] = null; }
+      }
+      return json({ ranks }, 200, cors);
+    }
+
     /* ---- /profile ---- */
     if (url.pathname !== "/profile") {
       return json({ error: "Endpoints disponibles: /profile o /live" }, 404, cors);
