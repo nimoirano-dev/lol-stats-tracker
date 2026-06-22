@@ -178,9 +178,12 @@
 ---
 
 ## Estado de pruebas (QA 2026-06-19)
-Test manual interactivo de las funciones. Resultado: **9/9 probadas funcionan**, sin fallas ni observaciones.
-- ✅ OK: solicitud de acceso + Discord, aprobar desde la app, actualizar stats, detalle de jugador, carrera de poeta, premios del ranking, Ranking de Poetas Contemporáneos, crear baneo + countdown + reacciones, subir captura + comentarios.
-- ⏳ Pendientes (requieren a alguien jugando en el momento): badge "en partida" + toast, modal en vivo (equipos/bans/rango), botón Espectar.
+Test manual interactivo de las funciones. Resultado: **12/12 probadas funcionan**, sin fallas ni observaciones.
+- ✅ Accesos: solicitud de acceso + Discord, aprobar desde la app.
+- ✅ Familiares: actualizar stats, detalle de jugador, carrera de poeta.
+- ✅ En vivo: badge "en partida" + toast, modal en vivo (equipos/bans/rango), botón Espectar (Porofessor).
+- ✅ Ranking/baneos: premios del ranking, Ranking de Poetas Contemporáneos, crear baneo + countdown + reacciones.
+- ✅ Capturas: subir captura + comentarios.
 
 ---
 
