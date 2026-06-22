@@ -177,6 +177,13 @@
 
 ---
 
+## Estado de pruebas (QA 2026-06-19)
+Test manual interactivo de las funciones. Resultado: **9/9 probadas funcionan**, sin fallas ni observaciones.
+- ✅ OK: solicitud de acceso + Discord, aprobar desde la app, actualizar stats, detalle de jugador, carrera de poeta, premios del ranking, Ranking de Poetas Contemporáneos, crear baneo + countdown + reacciones, subir captura + comentarios.
+- ⏳ Pendientes (requieren a alguien jugando en el momento): badge "en partida" + toast, modal en vivo (equipos/bans/rango), botón Espectar.
+
+---
+
 ## Estado de deploys requeridos por el usuario
 
 Cada vez que se modifica `index.html` → subir a GitHub Pages (rama `main` o `gh-pages`).
